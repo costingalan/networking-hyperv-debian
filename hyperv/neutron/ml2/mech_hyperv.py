@@ -16,10 +16,13 @@
 
 import re
 
+from neutron.extensions import portbindings
+from neutron.plugins.ml2.drivers import mech_agent
+
 from hyperv.neutron import constants
 
 
-class HypervMechanismDriver(object):
+class HypervMechanismDriver(mech_agent.SimpleAgentMechanismDriverBase):
     """Attach to networks using Hyper-V L2 Agent.
 
     The HypervMechanismDriver integrates the Ml2 Plugin with the
@@ -28,8 +31,20 @@ class HypervMechanismDriver(object):
     connectivity to at least one segment of the port's network.
     """
 
+    def __init__(self):
+        super(HypervMechanismDriver, self).__init__(
+            constants.AGENT_TYPE_HYPERV,
+            constants.VIF_TYPE_HYPERV,
+            {portbindings.CAP_PORT_FILTER: False})
+
     def get_allowed_network_types(self, agent=None):
-        return [constants.TYPE_LOCAL, constants.TYPE_FLAT, constants.TYPE_VLAN]
+        network_types = [constants.TYPE_LOCAL, constants.TYPE_FLAT,
+                         constants.TYPE_VLAN]
+        if agent is not None:
+            tunnel_types = agent.get('configurations', {}).get('tunnel_types')
+            if tunnel_types:
+                network_types.extend(tunnel_types)
+        return network_types
 
     def get_mappings(self, agent):
         return agent['configurations'].get('vswitch_mappings', {})

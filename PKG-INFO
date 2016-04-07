@@ -1,6 +1,6 @@
 Metadata-Version: 1.1
 Name: networking-hyperv
-Version: 1.0.2
+Version: 2.0.0
 Summary: This project tracks the work to integrate the Hyper-V networking with Neutron. This project contains the Hyper-V Neutron Agent Mixin, Security Groups Driver, ML2 Mechanism Driver and the utils modules they use in order to properly bind neutron ports on a Hyper-V host. This project resulted from the neutron core vendor decomposition.
 Home-page: http://www.cloudbase.it/
 Author: Cloudbase Solutions Srl
@@ -18,7 +18,7 @@ Description: =================
         
         * Free software: Apache license
         * Documentation: http://docs.openstack.org/developer/networking-hyperv
-        * Source: http://git.openstack.org/cgit/stackforge/networking-hyperv
+        * Source: http://git.openstack.org/cgit/openstack/networking-hyperv
         * Bugs: http://bugs.launchpad.net/networking-hyperv
         
         
@@ -93,7 +93,6 @@ Classifier: Operating System :: Microsoft :: Windows
 Classifier: Programming Language :: Python
 Classifier: Programming Language :: Python :: 2
 Classifier: Programming Language :: Python :: 2.7
-Classifier: Programming Language :: Python :: 2.6
 Classifier: Programming Language :: Python :: 3
 Classifier: Programming Language :: Python :: 3.3
 Classifier: Programming Language :: Python :: 3.4
