@@ -2,11 +2,15 @@
 # of appearance. Changing the order has an impact on the overall integration
 # process, which may cause wedges in the gate later.
 
-pbr>=0.6,!=0.7,<1.0
-Babel>=1.3
+pbr>=1.6 # Apache-2.0
+Babel>=1.3 # BSD
+eventlet!=0.18.3,>=0.18.2 # MIT
 
-oslo.config>=1.6.0      # Apache-2.0
-oslo.i18n>=1.3.0        # Apache-2.0
-oslo.serialization>=1.2.0 # Apache-2.0
-oslo.utils>=1.2.0       # Apache-2.0
-oslo.log                # Apache-2.0
+os-win>=0.2.3 # Apache-2.0
+oslo.config>=3.7.0 # Apache-2.0
+oslo.i18n>=2.1.0 # Apache-2.0
+oslo.log>=1.14.0 # Apache-2.0
+oslo.serialization>=1.10.0 # Apache-2.0
+oslo.utils>=3.5.0 # Apache-2.0
+
+python-neutronclient!=4.1.0,>=2.6.0 # Apache-2.0
