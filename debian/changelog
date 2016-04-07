@@ -1,8 +1,10 @@
-networking-hyperv (1.0.2-0ubuntu2) UNRELEASED; urgency=medium
+networking-hyperv (2.0.0-0ubuntu1) UNRELEASED; urgency=medium
 
-  * d/gbp.conf: Added debian-branch, upstream-tag and build-area 
+  * d/gbp.conf: Added debian-branch, upstream-tag and build-area
+  * New Upstream point release for OpenStack Mitaka
+  * d/control: Updated dependencies for OpenStack Mitaka
 
- -- Costin Galan <cgalan@cloudbasesolutions.com>  Thu, 07 Apr 2016 17:23:03 +0300
+ -- Costin Galan <cgalan@cloudbasesolutions.com>  Thu, 07 Apr 2016 17:31:00 +0300
 
 networking-hyperv (1.0.2-0ubuntu1) wily; urgency=medium
 

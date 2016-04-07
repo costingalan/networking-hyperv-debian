@@ -2,31 +2,51 @@ Source: networking-hyperv
 Section: python
 Priority: optional
 Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
-Build-Depends: debhelper (>= 9), dh-python, python-all (>= 2.6.6-3~)
-Build-Depends-Indep:
- python-babel (>= 1.3),
- python-eventlet (>= 0.16.1),
- python-fixtures (>= 0.3.14),
- python-hacking (>= 0.10.0),
- python-mock (>= 1.0),
- python-oslo-config (>= 1:1.9.3),
- python-oslo-i18n (>= 1.3.0),
- python-oslo-log (>= 1.0.0),
- python-oslo-serialization (>= 1.4.0),
- python-oslo-utils (>= 1.4.0),
- python-oslotest (>= 1.2.0),
- python-pbr (>= 0.6),
- python-setuptools,
- python-subunit (>= 0.0.18),
- python-testscenarios (>= 0.4),
- python-testtools (>= 0.9.36),
- testrepository (>= 0.0.18)
+Build-Depends: debhelper (>= 9),
+               dh-python,
+               openstack-pkg-tools (>= 34~),
+               python-all,
+               python-pbr (>= 1.6),
+               python-setuptools,
+               python-sphinx,
+Build-Depends-Indep: python-babel (>= 1.3),
+                     python-coverage (>= 3.6),
+                     python-eventlet (>= 0.18.2),
+                     python-fixtures (>= 1.3.1),
+                     python-hacking (>= 0.10.0),
+                     python-mock (>= 1.2),
+                     python-neutron (>= 2:8.0.0),
+                     python-neutronclient (>= 1:2.6.0),
+                     python-os-win (>= 0.2.3),
+                     python-oslo.config (>= 1:3.7.0),
+                     python-oslo.i18n (>= 2.1.0),
+                     python-oslo.log (>= 1.14.0),
+                     python-oslo.serialization (>= 1.10.0),
+                     python-oslo.utils (>= 3.5.0),
+                     python-oslosphinx (>= 2.5.0),
+                     python-oslotest (>= 1.10.0),
+                     python-subunit (>= 0.0.18),
+                     python-testscenarios (>= 0.4),
+                     python-testtools (>= 1.4.0),
+                     testrepository (>= 0.0.18),
 Standards-Version: 3.9.6
-Homepage: https://github.com/stackforge/networking-hyperv
+Homepage: https://github.com/openstack/networking-hyperv
 
 Package: python-networking-hyperv
 Architecture: all
-Depends: ${misc:Depends}, ${python:Depends}
+Depends: python-babel (>= 1.3),
+         python-eventlet (>= 0.18.2),
+         python-neutron (>= 2:8.0.0),
+         python-neutronclient (>= 1:2.6.0),
+         python-os-win (>= 0.2.3),
+         python-oslo.config (>= 1:3.7.0),
+         python-oslo.i18n (>= 2.1.0),
+         python-oslo.log (>= 1.14.0),
+         python-oslo.serialization (>= 1.10.0),
+         python-oslo.utils (>= 3.5.0),
+         python-pbr (>= 1.6),
+         ${misc:Depends},
+         ${python:Depends},
 Description: OpenStack Networking Hyper-V ML2 mechanism driver
  Neutron is a virtual network service for Openstack, and a part of
  Netstack. Just like OpenStack Nova provides an API to dynamically
