@@ -3,8 +3,9 @@ networking-hyperv (3.0.0-0ubuntu1) UNRELEASED; urgency=medium
   * d/gbp.conf: Switched with master branch for import
   * d/control: Updated dependencies for OpenStack Newton
   * New Upstream release for OpenStack Newton
+  * d/gbp.conf: Updated debian-branch for OpenStack Newton
 
- -- Costin GALAN <cgalan@cloudbasesolutions>  Tue, 11 Oct 2016 14:58:32 +0300
+ -- Costin Galan <cgalan@cloudbasesolutions>  Tue, 11 Oct 2016 14:58:32 +0300
 
 networking-hyperv (2.0.0-0ubuntu1) xenial; urgency=medium
 
