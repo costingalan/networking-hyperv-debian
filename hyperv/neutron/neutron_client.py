@@ -23,53 +23,24 @@ from hyperv.neutron import constants
 CONF = cfg.CONF
 LOG = logging.getLogger(__name__)
 
-neutron_opts = [
-    cfg.StrOpt('url',
-               default='http://127.0.0.1:9696',
-               help='URL for connecting to neutron'),
-    cfg.IntOpt('url_timeout',
-               default=30,
-               help='timeout value for connecting to neutron in seconds'),
-    cfg.StrOpt('admin_username',
-               help='username for connecting to neutron in admin context'),
-    cfg.StrOpt('admin_password',
-               help='password for connecting to neutron in admin context',
-               secret=True),
-    cfg.StrOpt('admin_tenant_name',
-               help='tenant name for connecting to neutron in admin context'),
-    cfg.StrOpt('admin_auth_url',
-               default='http://localhost:5000/v2.0',
-               help='auth url for connecting to neutron in admin context'),
-    cfg.StrOpt('auth_strategy',
-               default='keystone',
-               help='auth strategy for connecting to neutron in admin context')
-]
-
-CONF.register_opts(neutron_opts, 'neutron')
-
 
 class NeutronAPIClient(object):
 
     def __init__(self):
         self._init_client()
 
-    def _init_client(self, token=None):
+    def _init_client(self):
         params = {
             'endpoint_url': CONF.neutron.url,
             'timeout': CONF.neutron.url_timeout,
             'insecure': True,
             'ca_cert': None,
+            'username': CONF.neutron.admin_username,
+            'tenant_name': CONF.neutron.admin_tenant_name,
+            'password': CONF.neutron.admin_password,
+            'auth_url': CONF.neutron.admin_auth_url,
+            'auth_strategy': CONF.neutron.auth_strategy
         }
-
-        if token:
-            params['token'] = token
-            params['auth_strategy'] = None
-        else:
-            params['username'] = CONF.neutron.admin_username
-            params['tenant_name'] = CONF.neutron.admin_tenant_name
-            params['password'] = CONF.neutron.admin_password
-            params['auth_url'] = CONF.neutron.admin_auth_url
-            params['auth_strategy'] = CONF.neutron.auth_strategy
 
         self._client = clientv20.Client(**params)
 

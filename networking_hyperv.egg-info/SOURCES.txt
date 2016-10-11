@@ -27,6 +27,7 @@ hyperv/__init__.py
 hyperv/common/__init__.py
 hyperv/common/i18n.py
 hyperv/neutron/__init__.py
+hyperv/neutron/_common_utils.py
 hyperv/neutron/config.py
 hyperv/neutron/constants.py
 hyperv/neutron/exception.py
@@ -43,6 +44,7 @@ hyperv/tests/__init__.py
 hyperv/tests/base.py
 hyperv/tests/unit/__init__.py
 hyperv/tests/unit/neutron/__init__.py
+hyperv/tests/unit/neutron/test_common_utils.py
 hyperv/tests/unit/neutron/test_hyperv_agent_notifier.py
 hyperv/tests/unit/neutron/test_hyperv_neutron_agent.py
 hyperv/tests/unit/neutron/test_l2_agent.py
