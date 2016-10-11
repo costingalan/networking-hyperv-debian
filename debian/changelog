@@ -1,4 +1,4 @@
-networking-hyperv (3.0.0-0ubuntu1) UNRELEASED; urgency=medium
+networking-hyperv (3.0.0-0ubuntu1) yakkety; urgency=medium
 
   * d/gbp.conf: Switched with master branch for import
   * d/control: Updated dependencies for OpenStack Newton
