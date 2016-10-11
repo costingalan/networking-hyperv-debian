@@ -13,7 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from eventlet import greenthread
 import netaddr
 from neutron.agent import firewall
 from os_win import exceptions
@@ -23,6 +22,7 @@ from oslo_log import log as logging
 import six
 
 from hyperv.common.i18n import _LE, _LI  # noqa
+from hyperv.neutron import _common_utils as c_utils
 import threading
 
 LOG = logging.getLogger(__name__)
@@ -40,12 +40,16 @@ ACL_PROP_MAP = {
     'protocol': {'tcp': networkutils.NetworkUtils._TCP_PROTOCOL,
                  'udp': networkutils.NetworkUtils._UDP_PROTOCOL,
                  'icmp': networkutils.NetworkUtils._ICMP_PROTOCOL,
-                 'ipv6-icmp': networkutils.NetworkUtils._ICMPV6_PROTOCOL},
+                 'ipv6-icmp': networkutils.NetworkUtils._ICMPV6_PROTOCOL,
+                 'icmpv6': networkutils.NetworkUtils._ICMPV6_PROTOCOL},
     'action': {'allow': networkutils.NetworkUtils._ACL_ACTION_ALLOW,
                'deny': networkutils.NetworkUtils._ACL_ACTION_DENY},
     'default': "ANY",
     'address_default': {'IPv4': '0.0.0.0/0', 'IPv6': '::/0'}
 }
+
+
+_ports_synchronized = c_utils.get_port_synchronized_decorator('n-hv-driver-')
 
 
 class HyperVSecurityGroupsDriverMixin(object):
@@ -79,7 +83,7 @@ class HyperVSecurityGroupsDriverMixin(object):
                 remote_group_id = rule.get('remote_group_id')
                 if not remote_group_id:
                     grp_rule = rule.copy()
-                    grp_rule['security_group_id'] = sg_id
+                    grp_rule.pop('security_group_id', None)
                     port_rules.append(grp_rule)
                     continue
                 ethertype = rule['ethertype']
@@ -90,7 +94,12 @@ class HyperVSecurityGroupsDriverMixin(object):
                     direction_ip_prefix = DIRECTION_IP_PREFIX[direction]
                     ip_rule[direction_ip_prefix] = str(
                         netaddr.IPNetwork(ip).cidr)
-                    ip_rule['security_group_id'] = sg_id
+                    # NOTE(claudiub): avoid returning fields that are not
+                    # directly used in setting the security group rules
+                    # properly (remote_group_id, security_group_id), as they
+                    # only make testing for rule's identity harder.
+                    ip_rule.pop('security_group_id', None)
+                    ip_rule.pop('remote_group_id', None)
                     port_rules.append(ip_rule)
         return port_rules
 
@@ -143,6 +152,7 @@ class HyperVSecurityGroupsDriverMixin(object):
         self._security_ports[port['device']] = port
         self._sec_group_rules[port['id']] = newrules[port['id']]
 
+    @_ports_synchronized
     def _create_port_rules(self, port_id, rules):
         sg_rules = self._sg_gen.create_security_group_rules(rules)
         old_sg_rules = self._sec_group_rules[port_id]
@@ -151,6 +161,7 @@ class HyperVSecurityGroupsDriverMixin(object):
         self._add_sg_port_rules(port_id, list(set(add)))
         self._remove_sg_port_rules(port_id, list(set(rm)))
 
+    @_ports_synchronized
     def _remove_port_rules(self, port_id, rules):
         sg_rules = self._sg_gen.create_security_group_rules(rules)
         self._remove_sg_port_rules(port_id, list(set(sg_rules)))
@@ -159,8 +170,6 @@ class HyperVSecurityGroupsDriverMixin(object):
         if not sg_rules:
             return
         old_sg_rules = self._sec_group_rules[port_id]
-        # yielding to other threads that must run (like state reporting)
-        greenthread.sleep()
         try:
             self._utils.create_security_rules(port_id, sg_rules)
             old_sg_rules.extend(sg_rules)
@@ -198,8 +207,9 @@ class HyperVSecurityGroupsDriverMixin(object):
         LOG.info(_LI('Updating port rules.'))
 
         if port['device'] not in self._security_ports:
-            LOG.info(_LI("Device %(port)s not yet added."),
+            LOG.info(_LI("Device %(port)s not yet added. Adding."),
                      {'port': port['id']})
+            self.prepare_port_filter(port)
             return
 
         old_port = self._security_ports[port['device']]
@@ -278,7 +288,7 @@ class SecurityGroupRuleGeneratorR2(SecurityGroupRuleGenerator):
         protocol = self._get_rule_protocol(rule)
         if protocol == ACL_PROP_MAP['default']:
             # ANY protocols must be split up, to make stateful rules.
-            protocols = list(ACL_PROP_MAP['protocol'].values())
+            protocols = list(set(ACL_PROP_MAP['protocol'].values()))
         else:
             protocols = [protocol]
 
@@ -299,7 +309,7 @@ class SecurityGroupRuleGeneratorR2(SecurityGroupRuleGenerator):
         port = ACL_PROP_MAP['default']
         sg_rules = []
         for direction in ACL_PROP_MAP['direction'].values():
-            for protocol in ACL_PROP_MAP['protocol'].values():
+            for protocol in set(ACL_PROP_MAP['protocol'].values()):
                 for acl_type, address in ip_type_pairs:
                     sg_rules.append(SecurityGroupRuleR2(direction=direction,
                                                         local_port=port,
@@ -320,6 +330,10 @@ class SecurityGroupRuleGeneratorR2(SecurityGroupRuleGenerator):
 
     def _get_rule_protocol(self, rule):
         protocol = self._get_rule_prop_or_default(rule, 'protocol')
+        if protocol == 'icmp' and rule.get('ethertype') == 'IPv6':
+            # If protocol is ICMP and ethertype is IPv6 the protocol has
+            # to be ICMPv6.
+            return ACL_PROP_MAP['protocol']['ipv6-icmp']
         if protocol in six.iterkeys(ACL_PROP_MAP['protocol']):
             return ACL_PROP_MAP['protocol'][protocol]
 

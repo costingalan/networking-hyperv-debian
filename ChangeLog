@@ -1,6 +1,41 @@
 CHANGES
 =======
 
+* Update .gitreview for stable/newton
+
+3.0.0
+-----
+
+* TrivialFix: Remove cfg import unused
+* TrivialFix: Remove logging import unused
+
+3.0.0.0rc1
+----------
+
+* Expands unit test coverage
+* Cleans up unused code
+* Updated from global requirements
+* Update ML2 mechanism driver's README
+* Added unit tests for several methods
+* Updates README.rst
+* Refactors neutron_client config options
+*  Pass on port_delete RPC call
+* Add extra validations to the config options
+* Removes flake8 ignored errors
+* Enable DeprecationWarning in test environments
+* Declare hyperv namespace
+* Fix for VM's not getting IP due to missing SG rules
+* Updated from global requirements
+* Updated from global requirements
+* Properly updates the SG rules when SG is changed
+* Avoid port delete race conditions
+* Updated from global requirements
+* Fixes for multiple physnets in HyperV compute
+* Provide backwards compatibility for security_groups_driver
+* SG: Fixes ICMP protocol for IPv6
+* Updated from global requirements
+* Updated from global requirements
+
 2.0.0
 -----
 

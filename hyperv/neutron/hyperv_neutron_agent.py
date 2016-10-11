@@ -16,19 +16,18 @@
 
 import collections
 from concurrent import futures
-import inspect
 import re
 import threading
 import time
 
 from os_win import exceptions
 from os_win import utilsfactory
-from oslo_concurrency import lockutils
 from oslo_config import cfg
 from oslo_log import log as logging
 import six
 
 from hyperv.common.i18n import _, _LE, _LW, _LI  # noqa
+from hyperv.neutron import _common_utils as c_util
 from hyperv.neutron import constants
 from hyperv.neutron import exception
 from hyperv.neutron import nvgre_ops
@@ -37,22 +36,7 @@ CONF = cfg.CONF
 CONF.import_group('NVGRE', 'hyperv.neutron.config')
 LOG = logging.getLogger(__name__)
 
-synchronized = lockutils.synchronized_with_prefix('n-hv-agent-')
-
-
-def _port_synchronized(f):
-    # This decorator synchronizes operations targeting the same port.
-    # The decorated method is expected to accept the port_id argument.
-    def wrapper(*args, **kwargs):
-        call_args = inspect.getcallargs(f, *args, **kwargs)
-        port_id = call_args['port_id']
-        lock_name = 'port-lock-%s' % port_id
-
-        @synchronized(lock_name)
-        def inner():
-            return f(*args, **kwargs)
-        return inner()
-    return wrapper
+_port_synchronized = c_util.get_port_synchronized_decorator('n-hv-agent-')
 
 
 class HyperVNeutronAgentMixin(object):
@@ -118,6 +102,7 @@ networking-plugin-hyperv_agent.html
                 LOG.debug('Invalid physical network mapping: %s', mapping)
             else:
                 pattern = re.escape(parts[0].strip()).replace('\\*', '.*')
+                pattern = pattern + '$'
                 vswitch = parts[1].strip()
                 self._physical_network_mappings[pattern] = vswitch
 
@@ -171,8 +156,7 @@ networking-plugin-hyperv_agent.html
             LOG.debug("Network %s not defined on agent.", network_id)
 
     def port_delete(self, context, port_id=None):
-        LOG.debug("port_delete received")
-        self._port_unbound(port_id)
+        pass
 
     def port_update(self, context, port=None, network_type=None,
                     segmentation_id=None, physical_network=None):
@@ -323,16 +307,6 @@ networking-plugin-hyperv_agent.html
                                 "metrics."), port_id)
                 del self._port_metric_retries[port_id]
 
-    def _update_ports(self, registered_ports):
-        ports = self._utils.get_vnic_ids()
-        if ports == registered_ports:
-            return
-        added = ports - registered_ports
-        removed = registered_ports - ports
-        return {'current': ports,
-                'added': added,
-                'removed': removed}
-
     @_port_synchronized
     def _treat_vif_port(self, port_id, network_id, network_type,
                         physical_network, segmentation_id,
@@ -343,7 +317,7 @@ networking-plugin-hyperv_agent.html
             # check if security groups is enabled.
             # if not, teardown the security group rules
             if self.enable_security_groups:
-                self.sec_groups_agent.prepare_devices_filter([port_id])
+                self.sec_groups_agent.refresh_firewall([port_id])
             else:
                 self._utils.remove_all_security_rules(port_id)
         else:
